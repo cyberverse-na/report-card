@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Report Form - Addiction Classes</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+
+
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+
+
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+
+
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+
+
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+
+
+
+        button:hover {
+            background-color: #45a049;
+        }
+       
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+
+
+
+<h1>Weekly Report Form - Addiction Classes</h1>
+
+
+
+
+<form id="reportForm">
+    <label for="studentName">Student Name:</label>
+    <input type="text" id="studentName" required>
+
+
+
+
+    <label for="studentFatherName">Father's Name:</label>
+    <input type="text" id="studentFatherName" required>
+
+
+
+
+    <label for="studentClass">Class:</label>
+    <select id="studentClass" required>
+        <option value="5th">5th</option>
+        <option value="6th">6th</option>
+        <option value="7th">7th</option>
+        <option value="8th">8th</option>
+        <option value="9th">9th</option>
+        <option value="10th">10th</option>
+    </select>
+
+
+
+
+    <label for="studentRank">Rank:</label>
+    <select id="studentRank" required>
+        <option value="1st">1st</option>
+        <option value="2nd">2nd</option>
+        <option value="3rd">3rd</option>
+        <option value="4th">4th</option>
+        <option value="5th">5th</option>
+        <option value="6th">6th</option>
+        <option value="7th">7th</option>
+        <option value="8th">8th</option>
+        <option value="9th">9th</option>
+        <option value="10th">10th</option>
+        <option value="11th">11th</option>
+        <option value="12th">12th</option>
+        <option value="13th">13th</option>
+        <option value="14th">14th</option>
+        <option value="15th">15th</option>
+        <option value="16th">16th</option>
+        <option value="17th">17th</option>
+        <option value="18th">18th</option>
+        <option value="19th">19th</option>
+        <option value="20th">20th</option>
+        <option value="21st">21st</option>
+        <option value="22nd">22nd</option>
+        <option value="23rd">23rd</option>
+        <option value="24th">24th</option>
+        <option value="25th">25th</option>
+        <option value="26th">26th</option>
+        <option value="27th">27th</option>
+        <option value="28th">28th</option>
+        <option value="29th">29th</option>
+        <option value="30th">30th</option>
+        <option value="31st">31st</option>
+        <option value="32nd">32nd</option>
+        <option value="33rd">33rd</option>
+        <option value="34th">34th</option>
+        <option value="35th">35th</option>
+        <option value="36th">36th</option>
+        <option value="37th">37th</option>
+        <option value="38th">38th</option>
+        <option value="39th">39th</option>
+        <option value="40th">40th</option>
+    </select>
+    
+
+
+
+
+    <label for="studentComment">Behavior Comment:</label>
+    <textarea id="studentComment"></textarea>
+
+
+
+
+    <div class="day-report" id="reportDays"></div>
+
+
+
+
+    <button type="submit">Generate Report</button>
+</form>
+
+
+
+
+<canvas id="barChart"></canvas> <!-- Canvas for Chart.js -->
+
+
+
+
+<script>
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+
+
+
+    function generateDayFields() {
+        const reportDays = document.getElementById('reportDays');
+        days.forEach(day => {
+            const dayReport = document.createElement('div');
+            dayReport.classList.add('day-report');
+            dayReport.innerHTML = `
+                <label for="attendance${day}">${day} Attendance:</label>
+                <select id="attendance${day}" onchange="toggleFields('${day}')">
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                </select>
+                <select id="subject${day}" placeholder="Subject" disabled>
+                    <option></option>
+                    <option value='Hindi'>Hindi</option>
+                    <option value='Sanskrit'>Sanskrit</option>
+                    <option value='English'>English</option>
+                    <option value='Maths'>Maths</option>
+                    <option value='Science'>Science</option>
+                    <option value='Social'>Social</option>
+                </select>
+                <input type="number" id="marks${day}" placeholder="Marks" disabled>
+                <input type="number" id="totalMarks${day}" placeholder="Total Marks" disabled>
+            `;
+            reportDays.appendChild(dayReport);
+        });
+    }
+
+
+
+
+    generateDayFields();
+
+
+
+
+    function toggleFields(day) {
+        const attendance = document.getElementById(`attendance${day}`).value;
+        const subject = document.getElementById(`subject${day}`);
+        const marks = document.getElementById(`marks${day}`);
+        const totalMarks = document.getElementById(`totalMarks${day}`);
+       
+        if (attendance === "Absent") {
+            subject.disabled = true;
+            marks.disabled = true;
+            totalMarks.disabled = true;
+        } else {
+            subject.disabled = false;
+            marks.disabled = false;
+            totalMarks.disabled = false;
+        }
+    }
+
+
+
+
+    document.getElementById('reportForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+
+
+
+        for (let day of days) {
+            if (!validateMarks(day)) {
+                return;
+            }
+        }
+
+
+
+
+        const studentName = document.getElementById('studentName').value;
+        const studentFatherName = document.getElementById('studentFatherName').value;
+        const studentClass = document.getElementById('studentClass').value;
+        const studentRank = document.getElementById('studentRank').value;
+        const studentComment = document.getElementById('studentComment').value;
+
+
+
+
+        const marks = {};
+        const totalMarks = {};
+        const subjects = {};
+        const attendance = {};
+
+
+
+
+        days.forEach(day => {
+            marks[day] = document.getElementById(`marks${day}`).value;
+            totalMarks[day] = document.getElementById(`totalMarks${day}`).value;
+            subjects[day] = document.getElementById(`subject${day}`).value;
+            attendance[day] = document.getElementById(`attendance${day}`).value;
+        });
+
+
+
+
+        // Generate Bar GraphS
+        generateBarGraph(marks, totalMarks);
+
+
+
+
+        // Wait for the graph to be generated and add it to PDF
+        setTimeout(() => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const margin = 15;
+            let y = margin;
+
+
+
+
+            doc.setFontSize(22);
+            doc.setFont("helvetica", "bold");
+            doc.text('Weekly Report - Addiction Classes', margin, y);
+            y += 15;
+
+
+
+
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Name: ${studentName}`, margin, y);
+            y += 6;
+            doc.text(`Father's Name: ${studentFatherName}`, margin, y);
+            y += 6;
+            doc.text(`Class: ${studentClass}`, margin, y);
+            y += 6;
+            doc.text(`Rank: ${studentRank}`, margin, y);
+            y += 6;
+            doc.text(`Behavior Comment: ${studentComment}`, margin, y);
+            y += 15;
+
+
+
+
+            // Add Bar Chart Image
+            const chartCanvas = document.getElementById('barChart');
+            const chartImage = chartCanvas.toDataURL('image/png');
+            doc.addImage(chartImage, 'PNG', margin, y, 180, 100);
+            y += 110;
+
+
+
+
+            // Table Header
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(255, 255, 255);
+            doc.rect(margin, y, 190, 10, 'F');
+            doc.text('Day', margin + 5, y + 7);
+            doc.text('Subject', margin + 50, y + 7);
+            doc.text('Marks ', margin + 120, y + 7);
+            doc.text('Attendance', margin + 155, y + 7);
+            y += 15;
+
+
+
+
+            // Table Content
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(0, 0, 0);
+
+
+
+
+            days.forEach((day, index) => {
+                const isShaded = index % 2 === 0;
+                if (isShaded) {
+                    doc.setFillColor(240, 240, 240);  
+                    doc.rect(margin, y - 5, 190, 10, 'F');
+                }
+
+
+
+
+                doc.text(day, margin + 5, y);
+                doc.text(subjects[day], margin + 50, y);
+                doc.text(`${marks[day]} / ${totalMarks[day]}`, margin + 120, y);
+                doc.text(attendance[day], margin + 170, y);
+                y += 10;
+            });
+
+
+
+
+            // Footer
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "italic");
+            doc.text("Generated by Addiction Classes Weekly Report System", margin, y);
+            y += 10;
+
+
+
+
+            const fileName = `${studentName.replace(/\s+/g, '_')}_${studentFatherName.replace(/\s+/g, '_')}_Weekly_Report.pdf`;
+            doc.save(fileName);
+        }, 500); // Give enough time for the chart to be generated
+    });
+
+
+
+
+    function validateMarks(day) {
+        const marks = document.getElementById(`marks${day}`).value;
+        const totalMarks = document.getElementById(`totalMarks${day}`).value;
+        const attendance = document.getElementById(`attendance${day}`).value;
+
+
+
+
+        if (attendance === 'Absent') {
+            if (marks !== '' || totalMarks !== '') {
+                alert(`${day} - You cannot enter marks if the student is absent.`);
+                return false;
+            }
+        } else {
+            if (marks === '' || totalMarks === '') {
+                alert(`${day} - Please enter both marks and total marks.`);
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+
+    function generateBarGraph(marks, totalMarks) {
+        const canvas = document.getElementById('barChart');
+        const ctx = canvas.getContext('2d');
+        const percentages = days.map(day => {
+            const mark = marks[day] ? parseInt(marks[day], 10) : 0;
+            const total = totalMarks[day] ? parseInt(totalMarks[day], 10) : 0;
+            return total > 0 ? (mark / total) * 100 : 0;
+        });
+
+
+
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: days,
+                datasets: [{
+                    label: 'Marks Percentage',
+                    data: percentages,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+
+
+
+        canvas.style.display = 'block'; // Make the canvas visible for debugging if necessary
+    }
+</script>
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
